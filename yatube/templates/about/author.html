@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Об авторе проекта{% endblock %}
+{% block content %}
+{% load static %}
+<div class="card border-primary mx-auto" style="width: 28rem;">
+  <img src={% static 'img/workplace.png' %} class="card-img-top" alt="">
+  <div class="card-body">
+    <h5 class="card-header">Привет, я Александр</h5>
+    <p class="card-text text-primary"> Никогда раньше программированием не занимался,но давно хотел попробовать, в универе нет возможности учиться,
+      поэтому выбирал среди онлайн школ и решил учиться на яндекс-практикум.
+      С нулевыми знаниями учиться сложно,много разной информации,всё не запоминается и вылетает из головы,думал будет легче.
+      Надеюсь доучиться до конца и получить профит от этой учёбы. </p>
+    <a href="https://github.com/A1exSmirnov" class="btn btn-primary" target="_blank">Мой Github</a>
+  </div>
+</div>
+{% endblock %} 
+
