@@ -1,4 +1,5 @@
 from django.test import TestCase, Client
+from django.core.cache import cache
 
 from ..models import Group, Post, User
 
@@ -19,6 +20,7 @@ class PostURLTests(TestCase):
         )
 
     def setUp(self):
+        cache.clear()
         self.post_id = PostURLTests.post.id
         self.guest_client = Client()
         self.user = User.objects.create_user(username='StasBasov')

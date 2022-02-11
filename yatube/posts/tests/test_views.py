@@ -84,6 +84,11 @@ class PostPagesTests(TestCase):
                 'posts/create_post.html'
             ),
         }
+        for reverse_name, self.template in self.templates_page_names.items():
+            with self.subTest(template=self.template):
+                cache.clear()
+                self.response_8 = self.authorized_author.get(reverse_name)
+
         self.form_fields_1 = {
             'text': forms.fields.CharField,
             'group': forms.fields.ChoiceField
@@ -92,6 +97,7 @@ class PostPagesTests(TestCase):
             'text': forms.fields.CharField,
             'group': forms.fields.ChoiceField
         }
+        cache.clear()
         response_1 = self.authorized_client.get(reverse('posts:index'))
         first_object_1 = response_1.context['page_obj'][0]
         self.post_author_0 = first_object_1.author
@@ -120,11 +126,13 @@ class PostPagesTests(TestCase):
             reverse('posts:group_list', kwargs={'slug': self.group.slug}),
             reverse('posts:profile', kwargs={'username': self.user_1})
         ]
+        cache.clear()
         for adress in url:
             response_4 = self.authorized_client.get(adress)
             first_object_4 = response_4.context['page_obj'][0]
             self.post_text_3 = first_object_4.text
             self.post_group_3 = first_object_4.group.title
+        cache.clear()
         response_index = self.authorized_author.get(reverse('posts:index'))
         response_profile = self.authorized_author.get(
             reverse('posts:profile', kwargs={'username': self.user_1})
@@ -140,6 +148,7 @@ class PostPagesTests(TestCase):
             response_profile,
             response_group_list,
         ]
+        cache.clear()
         response_5 = self.authorized_author.get(reverse('posts:index'))
         self.content = response_5.content
         context = response_5.context['page_obj'][0]
@@ -149,10 +158,7 @@ class PostPagesTests(TestCase):
 
     def test_pages_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
-        for reverse_name, template in self.templates_page_names.items():
-            with self.subTest(template=template):
-                response = self.authorized_author.get(reverse_name)
-                self.assertTemplateUsed(response, template)
+        self.assertTemplateUsed(self.response_8, self.template)
 
     def test_home_page_show_correct_context(self):
         """Шаблон index сформирован с правильным контекстом."""
@@ -239,6 +245,7 @@ class PostPagesTests(TestCase):
         """
         for response in self.responses:
             with self.subTest(response=response):
+                cache.clear()
                 first_object = response.context['page_obj'][0]
                 post_image_0 = first_object.image
                 self.assertEqual(post_image_0, self.post.image)
@@ -327,6 +334,7 @@ class PaginatorViewsTest(TestCase):
 
     def setUp(self):
         self.guest_client = Client()
+        cache.clear()
 
     def test_index_first_page_contains_ten_records(self):
         response = self.guest_client.get(reverse('posts:index'))

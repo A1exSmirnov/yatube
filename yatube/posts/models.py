@@ -10,7 +10,10 @@ class Post(models.Model):
         'Текст поста',
         help_text='Введите текст поста'
     )
-    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+    pub_date = models.DateTimeField(
+        'Дата публикации',
+        auto_now_add=True
+    )
     group = models.ForeignKey(
         'Group',
         on_delete=models.SET_NULL,

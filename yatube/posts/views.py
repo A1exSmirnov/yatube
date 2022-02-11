@@ -2,15 +2,17 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
+from django.views.decorators.cache import cache_page
+
+
 from .models import Post, Group, User, Follow
 from .forms import PostForm, CommentForm
 
 
+@cache_page(20)
 def index(request):
-    post_list = Post.objects.all()
-    paginator = Paginator(post_list, settings.SELECT_POSTS)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    post_list = Post.objects.select_related('author', 'group').all()
+    page_obj = paginator(post_list, request)
     title = 'Последние обновления на сайте'
     context = {
         'page_obj': page_obj,
@@ -20,12 +22,9 @@ def index(request):
 
 
 def group_posts(request, slug):
-
     group = get_object_or_404(Group, slug=slug)
-    post_list = group.posts.all()
-    paginator = Paginator(post_list, settings.SELECT_POSTS)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    post_list = group.posts.select_related().all()
+    page_obj = paginator(post_list, request)
     title = f'Записи сообщества {group.title}'
     context = {
         'group': group,
@@ -37,22 +36,19 @@ def group_posts(request, slug):
 
 def profile(request, username):
     author = get_object_or_404(User, username=username)
-    post_list = author.posts.all()
-    paginator = Paginator(post_list, settings.SELECT_POSTS)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    post_list = author.posts.select_related('group').all()
+    page_obj = paginator(post_list, request)
     count = author.posts.count()
+    following = (
+        request.user.is_authenticated
+        and Follow.objects.filter(author=author, user=request.user).exists()
+    )
     context = {
         'page_obj': page_obj,
         'count': count,
         'author': author,
+        'following': following
     }
-    following_list = author.following.all()
-    for follow in following_list:
-        if follow.user == request.user:
-            context['following'] = True
-        else:
-            context['following'] = False
     return render(request, 'posts/profile.html', context)
 
 
@@ -121,10 +117,11 @@ def follow_index(request):
     author_list = []
     for follower in followers:
         author_list.append(follower.author)
-    post_list = Post.objects.filter(author__in=author_list)
-    paginator = Paginator(post_list, settings.SELECT_POSTS)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    post_list = (
+        Post.objects.filter
+        (author__in=author_list).select_related('author', 'group')
+    )
+    page_obj = paginator(post_list, request)
     title = 'Список постов авторов'
     context = {
         'page_obj': page_obj,
@@ -159,3 +156,10 @@ def profile_unfollow(request, username):
     following = get_object_or_404(Follow, author=author)
     following.delete()
     return redirect('posts:profile', username)
+
+
+def paginator(post_list, request):
+    paginator = Paginator(post_list, settings.SELECT_POSTS)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return page_obj
