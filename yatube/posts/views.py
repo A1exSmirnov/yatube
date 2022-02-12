@@ -135,7 +135,7 @@ def profile_follow(request, username):
         follow_new.user = request.user
         follow_new.author = author
         follow_new.save()
-        return redirect('posts:profile', username)
+    return redirect('posts:profile', username)
 
 
 @login_required
