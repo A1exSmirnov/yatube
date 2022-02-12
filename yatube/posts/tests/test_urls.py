@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from django.test import TestCase, Client
 from django.core.cache import cache
 
@@ -55,17 +56,17 @@ class PostURLTests(TestCase):
         for url in self.urls:
             with self.subTest(url=url):
                 response = self.guest_client.get(url)
-                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_post_edit_url_exists_at_desired_location_author_post(self):
         """Страница /posts/<int:post_id>/edit/ доступна автору поста."""
         response = self.authorized_author.get(f'/posts/{self.post_id}/edit/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_post_create_url_exists_at_desired_location_authorized(self):
         """Страница /create/ доступна авторизованному пользователю."""
         response = self.authorized_client.get('/create/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_post_edit_url_redirect_not_author_post_on_home_page(self):
         """
@@ -125,12 +126,12 @@ class StaticURLTests(TestCase):
 
     def test_homepage(self):
         response = self.guest_client.get('/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_author(self):
         response = self.guest_client.get('/about/author/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_tech(self):
         response = self.guest_client.get('/about/tech/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)

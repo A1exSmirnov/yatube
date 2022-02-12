@@ -9,7 +9,7 @@ from .models import Post, Group, User, Follow
 from .forms import PostForm, CommentForm
 
 
-@cache_page(20)
+@cache_page(settings.CACHE_TIME)
 def index(request):
     post_list = Post.objects.select_related('author', 'group').all()
     page_obj = paginator(post_list, request)
@@ -81,9 +81,10 @@ def post_create(request):
 @login_required
 def post_edit(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    form = PostForm(request.POST or None,
-                    files=request.FILES or None, instance=post
-                    )
+    form = PostForm(
+        request.POST or None,
+        files=request.FILES or None, instance=post
+    )
     if post.author == request.user:
         if form.is_valid():
             post = form.save(commit=False)
@@ -113,10 +114,7 @@ def add_comment(request, post_id):
 
 @login_required
 def follow_index(request):
-    followers = Follow.objects.filter(user=request.user)
-    author_list = []
-    for follower in followers:
-        author_list.append(follower.author)
+    author_list = Follow.objects.filter(user=request.user).values('author')
     post_list = (
         Post.objects.filter
         (author__in=author_list).select_related('author', 'group')
@@ -133,19 +131,13 @@ def follow_index(request):
 @login_required
 def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
-    following_list = author.following.all()
-    follower = []
-    for follow in following_list:
-        follower.append(follow.user)
-    if author != request.user:
-        if request.user in follower:
-            return redirect('posts:profile', username)
-        else:
-            follow_new = Follow()
-            follow_new.user = request.user
-            follow_new.author = author
-            follow_new.save()
-            return redirect('posts:profile', username)
+    follower = author.following.all().values('user')
+    if request.user not in follower and author != request.user:
+        follow_new = Follow()
+        follow_new.user = request.user
+        follow_new.author = author
+        follow_new.save()
+        return redirect('posts:profile', username)
     else:
         return redirect('posts:profile', username)
 
@@ -153,7 +145,7 @@ def profile_follow(request, username):
 @login_required
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
-    following = get_object_or_404(Follow, author=author)
+    following = get_object_or_404(Follow, author=author, user=request.user)
     following.delete()
     return redirect('posts:profile', username)
 

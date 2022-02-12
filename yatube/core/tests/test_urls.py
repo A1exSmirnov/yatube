@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from django.test import TestCase, Client
 
 from posts.models import Group, Post, User
@@ -24,5 +25,5 @@ class PostURLTests(TestCase):
     def test_404_page_uses_correct_template(self):
         """Страница 404 использует кастомный шаблон."""
         response = self.guest_client.get('/nonexist-page/')
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
         self.assertTemplateUsed(response, 'core/404.html')
