@@ -131,8 +131,8 @@ def follow_index(request):
 @login_required
 def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
-    follower = author.following.all().values('user')
-    if request.user not in follower and author != request.user:
+    follower = author.following.all().values_list('user', flat=True)
+    if request.user.id not in follower and author != request.user:
         follow_new = Follow()
         follow_new.user = request.user
         follow_new.author = author
