@@ -85,17 +85,18 @@ def post_edit(request, post_id):
         request.POST or None,
         files=request.FILES or None, instance=post
     )
-    if post.author == request.user:
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.save()
-            return redirect('posts:post_detail', post_id=post_id)
-        context = {
-            'form': form,
-            'is_edit': True
-        }
-        return render(request, "posts/create_post.html", context)
+    context = {
+        'form': form,
+        'is_edit': True
+    }
+    if post.author != request.user:
+        return redirect('posts:post_detail', post_id=post_id)
+    if form.is_valid():
+        post = form.save(commit=False)
+        post.author = request.user
+        post.save()
+        return redirect('posts:post_detail', post_id=post_id)
+    return render(request, "posts/create_post.html", context)
 
 
 @login_required

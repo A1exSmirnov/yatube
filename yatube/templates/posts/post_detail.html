@@ -41,13 +41,11 @@
         <img class="card-img my-2" src="{{ im.url }}">
       {% endthumbnail %}
     </article>
-    {% if post_detail.author.username == user.username %}
-    {% if request.user.is_authenticated %}
+    {% if post_detail.author.username == user.username and request.user.is_authenticated %}
     </div>
     <div class="card-body mx-auto">
     <a href="{% url 'posts:post_edit' post_detail.id %}" class="btn btn-primary">Редактировать запись</a>
     </div>
-   {% endif %}
    {% endif %}
    {% if user.is_authenticated %}
       <div class="card my-4">
