@@ -96,8 +96,6 @@ def post_edit(request, post_id):
             'is_edit': True
         }
         return render(request, "posts/create_post.html", context)
-    else:
-        return redirect('/')
 
 
 @login_required
@@ -137,8 +135,6 @@ def profile_follow(request, username):
         follow_new.user = request.user
         follow_new.author = author
         follow_new.save()
-        return redirect('posts:profile', username)
-    else:
         return redirect('posts:profile', username)
 
 

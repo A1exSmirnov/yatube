@@ -68,18 +68,6 @@ class PostURLTests(TestCase):
         response = self.authorized_client.get('/create/')
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
-    def test_post_edit_url_redirect_not_author_post_on_home_page(self):
-        """
-        Страница /posts/<int:post_id>/edit/
-        перенаправит авторизованного пользователя,
-        но не автора поста,
-        на главную страницу.
-        """
-        response = self.authorized_client.get(
-            f'/posts/{self.post_id}/edit/', follow=True
-        )
-        self.assertRedirects(response, '/')
-
     def test_post_create_url_redirect_anonymous_on_admin_login(self):
         """Страница /create/ перенаправит анонимного пользователя
         на страницу логина.
